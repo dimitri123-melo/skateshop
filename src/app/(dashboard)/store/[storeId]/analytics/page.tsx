@@ -7,6 +7,7 @@ import type { SearchParams } from "@/types"
 import { format } from "date-fns"
 import { eq } from "drizzle-orm"
 
+import { parseDateRange } from "@/lib/date-range"
 import {
   getCustomers,
   getOrderCount,
@@ -59,8 +60,7 @@ export default async function AnalyticsPage({
     .omit({ per_page: true, sort: true })
     .parse(searchParams)
 
-  const fromDay = from ? new Date(from) : undefined
-  const toDay = to ? new Date(to) : undefined
+  const { fromDay, toDay } = parseDateRange({ from, to })
   const dayCount =
     fromDay && toDay
       ? Math.round(

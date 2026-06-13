@@ -7,6 +7,8 @@ import { env } from "@/env.js"
 import type { SearchParams } from "@/types"
 import { and, asc, desc, eq, gte, like, lte, sql } from "drizzle-orm"
 
+import { getPagination } from "@/lib/pagination"
+import { parseDateRange } from "@/lib/date-range"
 import { customersSearchParamsSchema } from "@/lib/validations/params"
 import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton"
 import { DateRangePicker } from "@/components/date-range-picker"
@@ -47,15 +49,9 @@ export default async function CustomersPage({
     notFound()
   }
 
-  // Transaction is used to ensure both queries are executed in a single transaction
-  const fallbackPage = isNaN(page) || page < 1 ? 1 : page
-  // Number of items per page
-  const limit = isNaN(per_page) ? 10 : per_page
-  // Number of items to skip
-  const offset = fallbackPage > 0 ? (fallbackPage - 1) * limit : 0
+  const { limit, offset } = getPagination({ page, per_page })
 
-  const fromDay = from ? new Date(from) : undefined
-  const toDay = to ? new Date(to) : undefined
+  const { fromDay, toDay } = parseDateRange({ from, to })
 
   const ordersPromise = db.transaction(async (tx) => {
     const data = await db

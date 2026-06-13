@@ -7,13 +7,13 @@ import { env } from "@/env.js"
 import { currentUser } from "@clerk/nextjs/server"
 import { eq } from "drizzle-orm"
 
-import { getErrorMessage } from "@/lib/handle-error"
 import { resend } from "@/lib/resend"
 import type { UpdateNotificationSchema } from "@/lib/validations/notification"
 import NewsletterWelcomeEmail from "@/components/emails/newsletter-welcome-email"
+import { createAction } from "@/lib/actions/utils"
 
-export async function updateNotification(input: UpdateNotificationSchema) {
-  try {
+export const updateNotification = createAction(
+  async (input: UpdateNotificationSchema) => {
     const notification = await db
       .select({
         email: notifications.email,
@@ -52,14 +52,6 @@ export async function updateNotification(input: UpdateNotificationSchema) {
 
     revalidatePath("/")
 
-    return {
-      data: null,
-      error: null,
-    }
-  } catch (err) {
-    return {
-      data: null,
-      error: getErrorMessage(err),
-    }
+    return null
   }
-}
+)

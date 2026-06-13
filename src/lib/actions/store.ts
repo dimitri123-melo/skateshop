@@ -17,12 +17,12 @@ import {
   updateStoreSchema,
   type CreateStoreSchema,
 } from "@/lib/validations/store"
+import { createAction } from "@/lib/actions/utils"
 
-export async function createStore(
-  input: CreateStoreSchema & { userId: string }
-) {
-  noStore()
-  try {
+export const createStore = createAction(
+  async (input: CreateStoreSchema & { userId: string }) => {
+    noStore()
+
     const newStore = await db
       .insert(stores)
       .values({
@@ -39,17 +39,9 @@ export async function createStore(
 
     revalidateTag(`stores-${input.userId}`)
 
-    return {
-      data: newStore,
-      error: null,
-    }
-  } catch (err) {
-    return {
-      data: null,
-      error: getErrorMessage(err),
-    }
+    return newStore
   }
-}
+)
 
 export async function updateStore(storeId: string, fd: FormData) {
   noStore()

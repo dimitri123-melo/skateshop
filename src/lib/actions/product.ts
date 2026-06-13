@@ -7,22 +7,15 @@ import type { StoredFile } from "@/types"
 import { and, eq } from "drizzle-orm"
 import { type z } from "zod"
 
-import { getErrorMessage } from "@/lib/handle-error"
-import {
-  type CreateProductSchema,
-  type createProductSchema,
-  type updateProductRatingSchema,
-} from "@/lib/validations/product"
+import { type createProductSchema, type updateProductRatingSchema } from "@/lib/validations/product"
+import { type CreateProductSchema } from "@/lib/validations/product"
+import { createAction } from "@/lib/actions/utils"
 
-export async function filterProducts({ query }: { query: string }) {
-  noStore()
-  try {
-    if (query.length === 0) {
-      return {
-        data: null,
-        error: null,
-      }
-    }
+export const filterProducts = createAction(
+  async ({ query }: { query: string }) => {
+    noStore()
+
+    if (query.length === 0) return null
 
     const categoriesWithProducts = await db.query.categories.findMany({
       columns: {
@@ -41,25 +34,17 @@ export async function filterProducts({ query }: { query: string }) {
       where: (table, { sql }) => sql`position(${query} in ${table.name}) > 0`,
     })
 
-    return {
-      data: categoriesWithProducts,
-      error: null,
-    }
-  } catch (err) {
-    return {
-      data: null,
-      error: getErrorMessage(err),
-    }
+    return categoriesWithProducts
   }
-}
+)
 
-export async function addProduct(
-  input: Omit<CreateProductSchema, "images"> & {
-    storeId: string
-    images: StoredFile[]
-  }
-) {
-  try {
+export const addProduct = createAction(
+  async (
+    input: Omit<CreateProductSchema, "images"> & {
+      storeId: string
+      images: StoredFile[]
+    }
+  ) => {
     const productWithSameName = await db.query.products.findFirst({
       columns: {
         id: true,
@@ -78,22 +63,17 @@ export async function addProduct(
 
     revalidatePath(`/dashboard/stores/${input.storeId}/products.`)
 
-    return {
-      data: null,
-      error: null,
-    }
-  } catch (err) {
-    return {
-      data: null,
-      error: getErrorMessage(err),
-    }
+    return null
   }
-}
+)
 
-export async function updateProduct(
-  input: z.infer<typeof createProductSchema> & { id: string; storeId: string }
-) {
-  try {
+export const updateProduct = createAction(
+  async (
+    input: z.infer<typeof createProductSchema> & {
+      id: string
+      storeId: string
+    }
+  ) => {
     const product = await db.query.products.findFirst({
       where: and(
         eq(products.id, input.id),
@@ -115,22 +95,12 @@ export async function updateProduct(
 
     revalidatePath(`/dashboard/stores/${input.storeId}/products/${input.id}`)
 
-    return {
-      data: null,
-      error: null,
-    }
-  } catch (err) {
-    return {
-      data: null,
-      error: getErrorMessage(err),
-    }
+    return null
   }
-}
+)
 
-export async function updateProductRating(
-  input: z.infer<typeof updateProductRatingSchema>
-) {
-  try {
+export const updateProductRating = createAction(
+  async (input: z.infer<typeof updateProductRatingSchema>) => {
     const product = await db.query.products.findFirst({
       columns: {
         id: true,
@@ -150,20 +120,12 @@ export async function updateProductRating(
 
     revalidatePath("/")
 
-    return {
-      data: null,
-      error: null,
-    }
-  } catch (err) {
-    return {
-      data: null,
-      error: getErrorMessage(err),
-    }
+    return null
   }
-}
+)
 
-export async function deleteProduct(input: { id: string; storeId: string }) {
-  try {
+export const deleteProduct = createAction(
+  async (input: { id: string; storeId: string }) => {
     const product = await db.query.products.findFirst({
       columns: {
         id: true,
@@ -182,14 +144,6 @@ export async function deleteProduct(input: { id: string; storeId: string }) {
 
     revalidatePath(`/dashboard/stores/${input.storeId}/products`)
 
-    return {
-      data: null,
-      error: null,
-    }
-  } catch (err) {
-    return {
-      data: null,
-      error: getErrorMessage(err),
-    }
+    return null
   }
-}
+)
