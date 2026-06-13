@@ -54,8 +54,7 @@ export function SignInForm() {
 
         router.push(`${window.location.origin}/`)
       } else {
-        /*Investigate why the login hasn't completed */
-        console.log(result)
+        /* Login flow incomplete — possibly needs 2FA or email verification */
       }
     } catch (err) {
       showErrorToast(err)

@@ -18,17 +18,21 @@ import {
   type CreateStoreSchema,
 } from "@/lib/validations/store"
 
-export async function createStore(
-  input: CreateStoreSchema & { userId: string }
-) {
+export async function createStore(input: CreateStoreSchema) {
   noStore()
   try {
+    const { userId } = auth()
+
+    if (!userId) {
+      throw new Error("Unauthorized")
+    }
+
     const newStore = await db
       .insert(stores)
       .values({
         name: input.name,
         description: input.description,
-        userId: input.userId,
+        userId,
         slug: slugify(input.name),
       })
       .returning({
@@ -37,7 +41,7 @@ export async function createStore(
       })
       .then((res) => res[0])
 
-    revalidateTag(`stores-${input.userId}`)
+    revalidateTag(`stores-${userId}`)
 
     return {
       data: newStore,
@@ -54,10 +58,25 @@ export async function createStore(
 export async function updateStore(storeId: string, fd: FormData) {
   noStore()
   try {
+    const { userId } = auth()
+
+    if (!userId) {
+      throw new Error("Unauthorized")
+    }
+
     const input = updateStoreSchema.parse({
       name: fd.get("name"),
       description: fd.get("description"),
     })
+
+    const existingStore = await db.query.stores.findFirst({
+      columns: { id: true },
+      where: and(eq(stores.id, storeId), eq(stores.userId, userId)),
+    })
+
+    if (!existingStore) {
+      throw new Error("Store not found or access denied.")
+    }
 
     const storeWithSameName = await db.query.stores.findFirst({
       where: and(eq(stores.name, input.name), not(eq(stores.id, storeId))),
