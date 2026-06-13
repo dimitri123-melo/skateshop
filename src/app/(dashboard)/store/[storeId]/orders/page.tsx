@@ -142,7 +142,7 @@ export default async function OrdersPage({
         pageCount,
       }
     } catch (err) {
-      console.error(err)
+      console.error("Failed to fetch orders:", err)
       return {
         data: [],
         pageCount: 0,

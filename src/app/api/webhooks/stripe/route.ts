@@ -214,7 +214,7 @@ export async function POST(req: Request) {
             })
             .where(eq(carts.paymentIntentId, paymentIntentId))
         } catch (err) {
-          console.log("Error creating order.", err)
+          console.error("Error creating order.", err)
         }
       }
       break

@@ -36,6 +36,7 @@ export async function getNotification(input: {
 
     return notification
   } catch (err) {
+    console.error("Failed to get notification:", err)
     return null
   }
 }

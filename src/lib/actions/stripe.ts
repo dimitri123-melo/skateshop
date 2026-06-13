@@ -119,6 +119,7 @@ export async function getPlan(input: {
       isActive: isSubscribed && !isCanceled,
     }
   } catch (err) {
+    console.error("Failed to get plan:", err)
     return null
   }
 }
@@ -196,6 +197,7 @@ export async function getStripeAccount(
       payment,
     }
   } catch (err) {
+    console.error("Failed to get Stripe account:", err)
     return falsyReturn
   }
 }
@@ -240,6 +242,7 @@ export async function getPaymentIntents(
       hasMore: paymentIntents.has_more,
     }
   } catch (err) {
+    console.error("Failed to get payment intents:", err)
     return {
       paymentIntents: [],
       hasMore: false,
@@ -294,7 +297,7 @@ export async function getPaymentIntent(
       isVerified: true,
     }
   } catch (err) {
-    console.error(err)
+    console.error("Failed to get payment intent:", err)
     return {
       paymentIntent: null,
       isVerified: false,
