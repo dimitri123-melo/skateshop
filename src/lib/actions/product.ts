@@ -2,8 +2,9 @@
 
 import { unstable_noStore as noStore, revalidatePath } from "next/cache"
 import { db } from "@/db"
-import { products } from "@/db/schema"
+import { products, stores } from "@/db/schema"
 import type { StoredFile } from "@/types"
+import { auth } from "@clerk/nextjs/server"
 import { and, eq } from "drizzle-orm"
 import { type z } from "zod"
 
@@ -60,6 +61,21 @@ export async function addProduct(
   }
 ) {
   try {
+    const { userId } = auth()
+
+    if (!userId) {
+      throw new Error("Unauthorized")
+    }
+
+    const store = await db.query.stores.findFirst({
+      columns: { id: true },
+      where: and(eq(stores.id, input.storeId), eq(stores.userId, userId)),
+    })
+
+    if (!store) {
+      throw new Error("Store not found or access denied.")
+    }
+
     const productWithSameName = await db.query.products.findFirst({
       columns: {
         id: true,
@@ -94,6 +110,21 @@ export async function updateProduct(
   input: z.infer<typeof createProductSchema> & { id: string; storeId: string }
 ) {
   try {
+    const { userId } = auth()
+
+    if (!userId) {
+      throw new Error("Unauthorized")
+    }
+
+    const store = await db.query.stores.findFirst({
+      columns: { id: true },
+      where: and(eq(stores.id, input.storeId), eq(stores.userId, userId)),
+    })
+
+    if (!store) {
+      throw new Error("Store not found or access denied.")
+    }
+
     const product = await db.query.products.findFirst({
       where: and(
         eq(products.id, input.id),
@@ -131,6 +162,12 @@ export async function updateProductRating(
   input: z.infer<typeof updateProductRatingSchema>
 ) {
   try {
+    const { userId } = auth()
+
+    if (!userId) {
+      throw new Error("Unauthorized")
+    }
+
     const product = await db.query.products.findFirst({
       columns: {
         id: true,
@@ -164,6 +201,21 @@ export async function updateProductRating(
 
 export async function deleteProduct(input: { id: string; storeId: string }) {
   try {
+    const { userId } = auth()
+
+    if (!userId) {
+      throw new Error("Unauthorized")
+    }
+
+    const store = await db.query.stores.findFirst({
+      columns: { id: true },
+      where: and(eq(stores.id, input.storeId), eq(stores.userId, userId)),
+    })
+
+    if (!store) {
+      throw new Error("Store not found or access denied.")
+    }
+
     const product = await db.query.products.findFirst({
       columns: {
         id: true,

@@ -5,11 +5,20 @@ import { currentUser } from "@clerk/nextjs/server"
 import { eq } from "drizzle-orm"
 import { z } from "zod"
 
+import { ratelimit } from "@/lib/rate-limit"
 import { resend } from "@/lib/resend"
 import { joinNewsletterSchema } from "@/lib/validations/notification"
 import NewsletterWelcomeEmail from "@/components/emails/newsletter-welcome-email"
 
 export async function POST(req: Request) {
+  const ip = req.headers.get("x-forwarded-for") ?? "127.0.0.1"
+
+  const { success } = await ratelimit.limit(ip)
+
+  if (!success) {
+    return new Response("Rate limit exceeded", { status: 429 })
+  }
+
   const input = joinNewsletterSchema.parse(await req.json())
 
   try {

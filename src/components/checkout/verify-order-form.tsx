@@ -37,7 +37,6 @@ export function VerifyOderForm({ className, ...props }: VerifyOderFormProps) {
 
   function onSubmit(data: Inputs) {
     startTransition(() => {
-      console.log(data)
       // Original source: https://github.com/jackblatch/OneStopShop/blob/main/app/(storefront)/checkout/%5BstoreSlug%5D/order-confirmation/components/verification.tsx
       const location = `${
         window.location.href.split("&delivery_postal_code=")[0]

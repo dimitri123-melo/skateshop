@@ -22,7 +22,7 @@ interface CreateStoreProps {
   userId: string
 }
 
-export function CreateStore({ userId }: CreateStoreProps) {
+export function CreateStore({ userId: _userId }: CreateStoreProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isCreatePending, startCreateTransaction] = React.useTransition()
@@ -37,7 +37,7 @@ export function CreateStore({ userId }: CreateStoreProps) {
 
   function onSubmit(input: CreateStoreSchema) {
     startCreateTransaction(async () => {
-      const { data, error } = await createStore({ ...input, userId })
+      const { data, error } = await createStore(input)
 
       if (error) {
         toast.error(error)

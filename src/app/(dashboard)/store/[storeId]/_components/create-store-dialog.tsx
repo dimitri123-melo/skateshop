@@ -52,7 +52,7 @@ interface CreateStoreDialogProps
 }
 
 export function CreateStoreDialog({
-  userId,
+  userId: _userId,
   planMetricsPromise,
   onOpenChange,
   ...props
@@ -75,7 +75,7 @@ export function CreateStoreDialog({
 
   function onSubmit(input: CreateStoreSchema) {
     startCreateTransaction(async () => {
-      const { data, error } = await createStore({ ...input, userId })
+      const { data, error } = await createStore(input)
 
       if (error) {
         toast.error(error)

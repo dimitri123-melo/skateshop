@@ -97,14 +97,8 @@ export async function POST(req: Request) {
 
     // Handling payment events
     case "payment_intent.payment_failed":
-      const paymentIntentPaymentFailed = event.data.object
-      console.log(
-        `❌ Payment failed: ${paymentIntentPaymentFailed.last_payment_error?.message}`
-      )
       break
     case "payment_intent.processing":
-      const paymentIntentProcessing = event.data.object
-      console.log(`⏳ Payment processing: ${paymentIntentProcessing.id}`)
       break
     case "payment_intent.succeeded":
       const paymentIntentSucceeded = event.data.object
@@ -214,20 +208,16 @@ export async function POST(req: Request) {
             })
             .where(eq(carts.paymentIntentId, paymentIntentId))
         } catch (err) {
-          console.log("Error creating order.", err)
+          console.error("[stripe-webhook] Error creating order.")
         }
       }
       break
     case "application_fee.created":
-      const applicationFeeCreated = event.data.object
-      console.log(`Application fee id: ${applicationFeeCreated.id}`)
       break
     case "charge.succeeded":
-      const chargeSucceeded = event.data.object
-      console.log(`Charge id: ${chargeSucceeded.id}`)
       break
     default:
-      console.warn(`Unhandled event type: ${event.type}`)
+      break
   }
 
   return new Response(null, { status: 200 })
