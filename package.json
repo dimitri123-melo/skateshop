@@ -24,7 +24,9 @@
     "db:studio": "dotenv drizzle-kit studio",
     "email:dev": "email dev --dir src/components/emails -p 3001",
     "stripe:listen": "stripe listen --forward-to localhost:3000/api/webhooks/stripe --latest",
-    "unlighthouse": "pnpm dlx unlighthouse --site https://skateshop.sadmn.com"
+    "unlighthouse": "pnpm dlx unlighthouse --site https://skateshop.sadmn.com",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@clerk/nextjs": "^5.2.3",
@@ -118,6 +120,7 @@
     "@types/react-syntax-highlighter": "^15.5.13",
     "@typescript-eslint/eslint-plugin": "^7.16.0",
     "@typescript-eslint/parser": "^7.16.0",
+    "@vitest/coverage-v8": "^4.1.8",
     "autoprefixer": "^10.4.19",
     "dotenv-cli": "^7.4.2",
     "drizzle-kit": "^0.23.0",
@@ -142,7 +145,8 @@
     "tsx": "^4.16.2",
     "typescript": "^5.5.3",
     "unist-builder": "^4.0.0",
-    "unist-util-visit": "^5.0.0"
+    "unist-util-visit": "^5.0.0",
+    "vitest": "^4.1.8"
   },
   "overrides": {
     "next-contentlayer": {
