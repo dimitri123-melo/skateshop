@@ -79,6 +79,7 @@ export async function getCart(input?: {
 
     return cartLineItems
   } catch (err) {
+    console.error("Failed to get cart:", err)
     return []
   }
 }
@@ -105,6 +106,7 @@ export async function getUniqueStoreIds() {
 
     return storeIds
   } catch (err) {
+    console.error("Failed to get unique store IDs:", err)
     return []
   }
 }
@@ -121,6 +123,7 @@ export async function getCartItems(input: { cartId?: string }) {
 
     return cart?.items
   } catch (err) {
+    console.error("Failed to get cart items:", err)
     return []
   }
 }

@@ -63,6 +63,7 @@ export async function getStoreByUserId(input: { userId: string }) {
 
     return store
   } catch (err) {
+    console.error("Failed to get store by user ID:", err)
     return null
   }
 }
@@ -184,7 +185,7 @@ export async function getStores(input: SearchParams) {
       pageCount,
     }
   } catch (err) {
-    console.error(err)
+    console.error("Failed to get stores:", err)
     return {
       data: [],
       pageCount: 0,

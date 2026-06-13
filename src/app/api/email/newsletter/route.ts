@@ -61,7 +61,7 @@ export async function POST(req: Request) {
 
     return new Response(null, { status: 200 })
   } catch (error) {
-    console.error(error)
+    console.error("Newsletter subscription failed:", error)
 
     if (error instanceof z.ZodError) {
       return new Response(error.message, { status: 422 })

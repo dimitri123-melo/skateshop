@@ -141,7 +141,7 @@ export default async function ProductsPage({
         pageCount,
       }
     } catch (err) {
-      console.error(err)
+      console.error("Failed to fetch products:", err)
       return {
         data: [],
         pageCount: 0,

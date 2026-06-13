@@ -37,6 +37,7 @@ export async function getUserUsageMetrics(input: { userId: string }) {
       productCount: data?.productCount ?? 0,
     }
   } catch (err) {
+    console.error("Failed to get user usage metrics:", err)
     return {
       storeCount: 0,
       productCount: 0,
@@ -85,6 +86,7 @@ export async function getUserPlanMetrics(input: { userId: string }) {
       subscriptionPlan,
     }
   } catch (err) {
+    console.error("Failed to get user plan metrics:", err)
     return fallback
   }
 }

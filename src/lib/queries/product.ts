@@ -148,6 +148,7 @@ export async function getProducts(input: SearchParams) {
 
     return transaction
   } catch (err) {
+    console.error("Failed to get products:", err)
     return {
       data: [],
       pageCount: 0,

@@ -63,7 +63,7 @@ export function JoinNewsletterForm() {
       toast.success("You have been subscribed to our newsletter.")
       form.reset()
     } catch (err) {
-      console.log(err)
+      console.error("Failed to join newsletter:", err)
       toast.error(unknownError)
     } finally {
       setLoading(false)

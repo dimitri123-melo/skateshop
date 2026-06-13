@@ -193,6 +193,7 @@ export async function getOrderLineItems(
 
     return lineItems
   } catch (err) {
+    console.error("Failed to get order line items:", err)
     return []
   }
 }
@@ -299,7 +300,7 @@ export async function getStoreOrders(input: {
       }
     })
   } catch (err) {
-    console.error(err)
+    console.error("Failed to get store orders:", err)
     return {
       data: [],
       pageCount: 0,
@@ -332,6 +333,7 @@ export async function getOrderCount(input: {
       .execute()
       .then((res) => res[0]?.count ?? 0)
   } catch (err) {
+    console.error("Failed to get order count:", err)
     return 0
   }
 }
@@ -366,6 +368,7 @@ export async function getSaleCount(input: {
 
     return sales
   } catch (err) {
+    console.error("Failed to get sale count:", err)
     return 0
   }
 }
@@ -404,6 +407,7 @@ export async function getSales(input: {
       )
       .execute()
   } catch (err) {
+    console.error("Failed to get sales:", err)
     return []
   }
 }
@@ -470,6 +474,7 @@ export async function getCustomers(input: {
 
     return transaction
   } catch (err) {
+    console.error("Failed to get customers:", err)
     return {
       customers: [],
       customerCount: 0,

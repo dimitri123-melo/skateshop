@@ -18,7 +18,7 @@ export function getErrorMessage(err: unknown) {
 
 export function showErrorToast(err: unknown) {
   const errorMessage = getErrorMessage(err)
-  console.log({ errorMessage })
+  console.error(errorMessage)
 
   return toast.error(errorMessage)
 }
