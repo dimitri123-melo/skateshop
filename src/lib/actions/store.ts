@@ -21,7 +21,7 @@ import {
 export async function createStore(input: CreateStoreSchema) {
   noStore()
   try {
-    const { userId } = auth()
+    const { userId } = await auth()
 
     if (!userId) {
       throw new Error("Unauthorized")
@@ -58,7 +58,7 @@ export async function createStore(input: CreateStoreSchema) {
 export async function updateStore(storeId: string, fd: FormData) {
   noStore()
   try {
-    const { userId } = auth()
+    const { userId } = await auth()
 
     if (!userId) {
       throw new Error("Unauthorized")
@@ -103,7 +103,7 @@ export async function updateStore(storeId: string, fd: FormData) {
 }
 
 export async function deleteStore(storeId: string) {
-  const { userId } = auth()
+  const { userId } = await auth()
 
   if (!userId) {
     throw new Error("Unauthorized")

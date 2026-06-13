@@ -16,7 +16,7 @@ import {
 
 export async function POST(req: Request) {
   const body = await req.text()
-  const signature = headers().get("Stripe-Signature") ?? ""
+  const signature = (await headers()).get("Stripe-Signature") ?? ""
 
   let event: Stripe.Event
 
@@ -51,7 +51,8 @@ export async function POST(req: Request) {
         // Update the user stripe into in our database.
         // Since this is the initial subscription, we need to update
         // the subscription id and customer id.
-        await clerkClient.users.updateUserMetadata(
+        const client = await clerkClient()
+        await client.users.updateUserMetadata(
           checkoutSessionCompleted?.metadata?.userId,
           {
             privateMetadata: {
@@ -80,7 +81,8 @@ export async function POST(req: Request) {
         )
 
         // Update the price id and set the new period end
-        await clerkClient.users.updateUserMetadata(
+        const invoiceClient = await clerkClient()
+        await invoiceClient.users.updateUserMetadata(
           invoicePaymentSucceeded?.metadata?.userId,
           {
             privateMetadata: {

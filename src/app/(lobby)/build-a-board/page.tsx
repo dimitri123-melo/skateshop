@@ -50,7 +50,7 @@ export default async function BuildABoardPage({
   // })
 
   // Get cart items
-  const cartId = cookies().get("cartId")?.value
+  const cartId = (await cookies()).get("cartId")?.value
   const cartItems = await getCartItems({ cartId })
 
   return (

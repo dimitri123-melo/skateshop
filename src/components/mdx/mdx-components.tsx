@@ -1,4 +1,5 @@
-import { useMDXComponent } from "next-contentlayer/hooks"
+import * as React from "react"
+import * as runtime from "react/jsx-runtime"
 
 import { cn } from "@/lib/utils"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -152,6 +153,13 @@ const components = {
   LinkBadge: LinkBadge,
   ScrollArea,
   Callout,
+}
+
+function useMDXComponent(code: string) {
+  const fn = new Function(code)
+  return fn({ ...runtime }).default as React.ComponentType<{
+    components?: Record<string, React.ComponentType>
+  }>
 }
 
 interface MdxProps {
