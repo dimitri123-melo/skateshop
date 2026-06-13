@@ -29,6 +29,9 @@ import {
 import type Stripe from "stripe"
 import { z } from "zod"
 
+import { getPagination } from "@/lib/pagination"
+import { parseSortString } from "@/lib/sorting"
+import { parseDateRange } from "@/lib/date-range"
 import {
   checkoutItemSchema,
   type CartLineItemSchema,
@@ -206,22 +209,12 @@ export async function getStoreOrders(input: {
     const { page, per_page, sort, customer, status, from, to } =
       ordersSearchParamsSchema.parse(input.searchParams)
 
-    // Fallback page for invalid page numbers
-    const fallbackPage = isNaN(page) || page < 1 ? 1 : page
-    // Number of items per page
-    const limit = isNaN(per_page) ? 10 : per_page
-    // Number of items to skip
-    const offset = fallbackPage > 0 ? (fallbackPage - 1) * limit : 0
-    // Column and order to sort by
-    const [column, order] = (sort.split(".") as [
-      keyof Order | undefined,
-      "asc" | "desc" | undefined,
-    ]) ?? ["createdAt", "desc"]
+    const { limit, offset } = getPagination({ page, per_page })
+    const { column, order } = parseSortString<keyof Order>(sort)
 
     const statuses = status ? status.split(".") : []
 
-    const fromDay = from ? new Date(from) : undefined
-    const toDay = to ? new Date(to) : undefined
+    const { fromDay, toDay } = parseDateRange({ from, to })
 
     // Transaction is used to ensure both queries are executed in a single transaction
     return await db.transaction(async (tx) => {

@@ -8,6 +8,9 @@ import { env } from "@/env.js"
 import type { SearchParams } from "@/types"
 import { and, asc, desc, eq, gte, inArray, like, lte, sql } from "drizzle-orm"
 
+import { getPagination } from "@/lib/pagination"
+import { parseSortString } from "@/lib/sorting"
+import { parseDateRange } from "@/lib/date-range"
 import { storesProductsSearchParamsSchema } from "@/lib/validations/params"
 import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton"
 import { DateRangePicker } from "@/components/date-range-picker"
@@ -48,22 +51,12 @@ export default async function ProductsPage({
     notFound()
   }
 
-  // Fallback page for invalid page numbers
-  const fallbackPage = isNaN(page) || page < 1 ? 1 : page
-  // Number of items per page
-  const limit = isNaN(per_page) ? 10 : per_page
-  // Number of items to skip
-  const offset = fallbackPage > 0 ? (fallbackPage - 1) * limit : 0
-  // Column and order to sort by
-  const [column, order] = (sort?.split(".") as [
-    keyof Product | undefined,
-    "asc" | "desc" | undefined,
-  ]) ?? ["createdAt", "desc"]
+  const { limit, offset } = getPagination({ page, per_page })
+  const { column, order } = parseSortString<keyof Product>(sort)
 
   const categoryIds = category?.split(".") ?? []
 
-  const fromDay = from ? new Date(from) : undefined
-  const toDay = to ? new Date(to) : undefined
+  const { fromDay, toDay } = parseDateRange({ from, to })
 
   // Transaction is used to ensure both queries are executed in a single transaction
   const productsPromise = db.transaction(async (tx) => {

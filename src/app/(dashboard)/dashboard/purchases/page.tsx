@@ -7,6 +7,8 @@ import { env } from "@/env.js"
 import type { SearchParams } from "@/types"
 import { and, asc, desc, eq, inArray, like, sql } from "drizzle-orm"
 
+import { getPagination } from "@/lib/pagination"
+import { parseSortString } from "@/lib/sorting"
 import { getCachedUser } from "@/lib/queries/user"
 import { getUserEmail } from "@/lib/utils"
 import { purchasesSearchParamsSchema } from "@/lib/validations/params"
@@ -42,18 +44,8 @@ export default async function PurchasesPage({
 
   const email = getUserEmail(user)
 
-  // Fallback page for invalid page numbers
-  const fallbackPage = isNaN(page) || page < 1 ? 1 : page
-  // Number of items per page
-  const limit = isNaN(per_page) ? 10 : per_page
-  // Number of items to skip
-  const offset = fallbackPage > 0 ? (fallbackPage - 1) * limit : 0
-
-  // Column and order to sort by
-  const [column, order] = (sort?.split(".") as [
-    keyof Order | undefined,
-    "asc" | "desc" | undefined,
-  ]) ?? ["createdAt", "desc"]
+  const { limit, offset } = getPagination({ page, per_page })
+  const { column, order } = parseSortString<keyof Order>(sort)
 
   const statuses = status ? status.split(".") : []
 
