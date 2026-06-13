@@ -4,7 +4,7 @@ import { unstable_noStore as noStore, revalidatePath } from "next/cache"
 import { cookies } from "next/headers"
 import { db } from "@/db"
 import { carts, categories, products, stores, subcategories } from "@/db/schema"
-import { and, asc, desc, eq, inArray, sql } from "drizzle-orm"
+import { and, asc, desc, eq, inArray } from "drizzle-orm"
 import { type z } from "zod"
 
 import { getErrorMessage } from "@/lib/handle-error"
@@ -91,19 +91,27 @@ export async function getUniqueStoreIds() {
   if (!cartId) return []
 
   try {
-    const cart = await db
+    const cart = await db.query.carts.findFirst({
+      columns: {
+        items: true,
+      },
+      where: eq(carts.id, cartId),
+    })
+
+    const productIds = cart?.items?.map((item) => item.productId) ?? []
+
+    if (productIds.length === 0) return []
+
+    const uniqueProductIds = [...new Set(productIds)]
+
+    const storeIdsResult = await db
       .selectDistinct({ storeId: products.storeId })
-      .from(carts)
-      .leftJoin(
-        products,
-        sql`JSON_CONTAINS(carts.items, JSON_OBJECT('productId', products.id))`
-      )
-      .groupBy(products.storeId)
-      .where(eq(carts.id, cartId))
+      .from(products)
+      .where(inArray(products.id, uniqueProductIds))
 
-    const storeIds = cart.map((item) => item.storeId).filter((id) => id)
-
-    return storeIds
+    return storeIdsResult
+      .map((item) => item.storeId)
+      .filter((id): id is string => id !== null)
   } catch (err) {
     return []
   }
