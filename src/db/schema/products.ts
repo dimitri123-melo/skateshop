@@ -14,11 +14,13 @@ import {
 import { generateId } from "@/lib/id"
 
 import { categories } from "./categories"
+import { reviews } from "./reviews"
 import { stores } from "./stores"
 import { subcategories } from "./subcategories"
 import { productTags } from "./tags"
 import { lifecycleDates } from "./utils"
 import { productVariants } from "./variants"
+import { wishlists } from "./wishlists"
 
 export const productStatusEnum = pgEnum("product_status", [
   "active",
@@ -82,6 +84,8 @@ export const productsRelations = relations(products, ({ one, many }) => ({
   }),
   variants: many(productVariants, { relationName: "productVariants" }),
   tags: many(productTags, { relationName: "productTags" }),
+  reviews: many(reviews),
+  wishlists: many(wishlists),
 }))
 
 export type Product = typeof products.$inferSelect

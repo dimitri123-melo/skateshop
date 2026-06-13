@@ -90,7 +90,7 @@ export async function getOrderLineItems(
     // Temporary workaround for payment_intent.succeeded webhook event not firing in production
     // TODO: Remove this once the webhook is working
     if (input.paymentIntent?.status === "succeeded") {
-      const cartId = String(cookies().get("cartId")?.value)
+      const cartId = String((await cookies()).get("cartId")?.value)
 
       const cart = await db.query.carts.findFirst({
         columns: {

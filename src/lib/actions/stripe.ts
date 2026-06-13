@@ -71,7 +71,8 @@ export async function getPlan(input: {
 }): Promise<UserPlan | null> {
   noStore()
   try {
-    const user = await clerkClient.users.getUser(input.userId)
+    const client = await clerkClient()
+    const user = await client.users.getUser(input.userId)
 
     if (!user) {
       throw new Error("User not found.")
@@ -255,7 +256,7 @@ export async function getPaymentIntent(
   noStore()
 
   try {
-    const cartId = cookies().get("cartId")?.value
+    const cartId = (await cookies()).get("cartId")?.value
 
     const { isConnected, payment } = await getStripeAccount({
       storeId: input.storeId,
@@ -451,7 +452,7 @@ export async function createPaymentIntent(
       throw new Error("Stripe account not found.")
     }
 
-    const cartId = cookies().get("cartId")?.value
+    const cartId = (await cookies()).get("cartId")?.value
 
     if (!cartId) {
       throw new Error("Cart not found.")

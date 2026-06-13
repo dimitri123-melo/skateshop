@@ -14,8 +14,8 @@ export const metadata: Metadata = {
   description: "Get started with your new store",
 }
 
-export default function OnboardingPage() {
-  const { userId } = auth()
+export default async function OnboardingPage() {
+  const { userId } = await auth()
 
   if (!userId) {
     redirect("/signin")

@@ -1,7 +1,7 @@
 import { type MetadataRoute } from "next"
 import { db } from "@/db"
 import { categories, products, stores, subcategories } from "@/db/schema"
-import { allPages, allPosts } from "contentlayer/generated"
+import { allPages, allPosts } from "@/lib/content"
 import { count, desc, eq, sql } from "drizzle-orm"
 
 import { absoluteUrl } from "@/lib/utils"

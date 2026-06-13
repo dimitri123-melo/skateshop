@@ -18,17 +18,21 @@ import {
   type CreateStoreSchema,
 } from "@/lib/validations/store"
 
-export async function createStore(
-  input: CreateStoreSchema & { userId: string }
-) {
+export async function createStore(input: CreateStoreSchema) {
   noStore()
   try {
+    const { userId } = await auth()
+
+    if (!userId) {
+      throw new Error("Unauthorized")
+    }
+
     const newStore = await db
       .insert(stores)
       .values({
         name: input.name,
         description: input.description,
-        userId: input.userId,
+        userId,
         slug: slugify(input.name),
       })
       .returning({
@@ -37,7 +41,7 @@ export async function createStore(
       })
       .then((res) => res[0])
 
-    revalidateTag(`stores-${input.userId}`)
+    revalidateTag(`stores-${userId}`)
 
     return {
       data: newStore,
@@ -54,6 +58,12 @@ export async function createStore(
 export async function updateStore(storeId: string, fd: FormData) {
   noStore()
   try {
+    const { userId } = await auth()
+
+    if (!userId) {
+      throw new Error("Unauthorized")
+    }
+
     const input = updateStoreSchema.parse({
       name: fd.get("name"),
       description: fd.get("description"),
@@ -76,7 +86,7 @@ export async function updateStore(storeId: string, fd: FormData) {
         name: input.name,
         description: input.description,
       })
-      .where(eq(stores.id, storeId))
+      .where(and(eq(stores.id, storeId), eq(stores.userId, userId)))
 
     revalidatePath(`/store/${storeId}`)
 
@@ -93,7 +103,7 @@ export async function updateStore(storeId: string, fd: FormData) {
 }
 
 export async function deleteStore(storeId: string) {
-  const { userId } = auth()
+  const { userId } = await auth()
 
   if (!userId) {
     throw new Error("Unauthorized")
@@ -112,7 +122,13 @@ export async function deleteStore(storeId: string) {
   //   throw new Error("Can't delete the only store")
   // }
 
-  await db.delete(stores).where(eq(stores.id, storeId))
+  if (!allStores.length) {
+    throw new Error("Store not found or unauthorized")
+  }
+
+  await db
+    .delete(stores)
+    .where(and(eq(stores.id, storeId), eq(stores.userId, userId)))
 
   revalidateTag(`stores-${userId}`)
 

@@ -43,5 +43,5 @@ yarn-error.log*
 .vercel
 
 # typescript
-.contentlayer
+.velite
 *.tsbuildinfo

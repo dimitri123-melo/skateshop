@@ -4,7 +4,7 @@ import { unstable_noStore as noStore, revalidatePath } from "next/cache"
 import { cookies } from "next/headers"
 import { db } from "@/db"
 import { carts, categories, products, stores, subcategories } from "@/db/schema"
-import { and, asc, desc, eq, inArray, sql } from "drizzle-orm"
+import { and, asc, desc, eq, inArray } from "drizzle-orm"
 import { type z } from "zod"
 
 import { getErrorMessage } from "@/lib/handle-error"
@@ -20,7 +20,7 @@ export async function getCart(input?: {
 }): Promise<CartLineItemSchema[]> {
   noStore()
 
-  const cartId = cookies().get("cartId")?.value
+  const cartId = (await cookies()).get("cartId")?.value
 
   if (!cartId) return []
 
@@ -86,24 +86,32 @@ export async function getCart(input?: {
 export async function getUniqueStoreIds() {
   noStore()
 
-  const cartId = cookies().get("cartId")?.value
+  const cartId = (await cookies()).get("cartId")?.value
 
   if (!cartId) return []
 
   try {
-    const cart = await db
+    const cart = await db.query.carts.findFirst({
+      columns: {
+        items: true,
+      },
+      where: eq(carts.id, cartId),
+    })
+
+    const productIds = cart?.items?.map((item) => item.productId) ?? []
+
+    if (productIds.length === 0) return []
+
+    const uniqueProductIds = [...new Set(productIds)]
+
+    const storeIdsResult = await db
       .selectDistinct({ storeId: products.storeId })
-      .from(carts)
-      .leftJoin(
-        products,
-        sql`JSON_CONTAINS(carts.items, JSON_OBJECT('productId', products.id))`
-      )
-      .groupBy(products.storeId)
-      .where(eq(carts.id, cartId))
+      .from(products)
+      .where(inArray(products.id, uniqueProductIds))
 
-    const storeIds = cart.map((item) => item.storeId).filter((id) => id)
-
-    return storeIds
+    return storeIdsResult
+      .map((item) => item.storeId)
+      .filter((id): id is string => id !== null)
   } catch (err) {
     return []
   }
@@ -147,7 +155,7 @@ export async function addToCart(rawInput: z.infer<typeof cartItemSchema>) {
       throw new Error("Product is out of stock, please try again later.")
     }
 
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
     const cartId = cookieStore.get("cartId")?.value
 
     if (!cartId) {
@@ -242,7 +250,7 @@ export async function updateCartItem(rawInput: z.infer<typeof cartItemSchema>) {
   try {
     const input = cartItemSchema.parse(rawInput)
 
-    const cartId = cookies().get("cartId")?.value
+    const cartId = (await cookies()).get("cartId")?.value
 
     if (!cartId) {
       throw new Error("cartId not found, please try again.")
@@ -296,7 +304,7 @@ export async function deleteCart() {
   noStore()
 
   try {
-    const cartId = cookies().get("cartId")?.value
+    const cartId = (await cookies()).get("cartId")?.value
 
     if (!cartId) {
       throw new Error("cartId not found, please try again.")
@@ -324,7 +332,7 @@ export async function deleteCartItem(
   noStore()
 
   try {
-    const cartId = cookies().get("cartId")?.value
+    const cartId = (await cookies()).get("cartId")?.value
 
     if (!cartId) {
       throw new Error("cartId not found, please try again.")
@@ -361,7 +369,7 @@ export async function deleteCartItems(
   noStore()
 
   try {
-    const cartId = cookies().get("cartId")?.value
+    const cartId = (await cookies()).get("cartId")?.value
 
     if (!cartId) {
       throw new Error("cartId not found, please try again.")

@@ -1,6 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
-import { type Post } from "contentlayer/generated"
+import { type Post } from "@/lib/content"
 
 import { formatDate } from "@/lib/utils"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
