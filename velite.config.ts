@@ -2,15 +2,6 @@ import rehypeAutolinkHeadings from "rehype-autolink-headings"
 import rehypeSlug from "rehype-slug"
 import { defineCollection, defineConfig, s } from "velite"
 
-const computedFields = <T extends { metadata: { path: string } }>(data: T) => {
-  const flattenedPath = data.metadata.path
-  return {
-    ...data,
-    slug: `/${flattenedPath}`,
-    slugAsParams: flattenedPath.split("/").slice(1).join("/"),
-  }
-}
-
 const posts = defineCollection({
   name: "Post",
   pattern: "blog/**/*.mdx",
@@ -23,15 +14,16 @@ const posts = defineCollection({
       image: s.string(),
       authors: s.array(s.string()),
       body: s.mdx(),
-      metadata: s.metadata(),
+      slug: s.path(),
     })
     .transform((data) => {
-      const base = computedFields(data)
       const wordsPerMinute = 200
       const numberOfWords = data.body.split(/\s/g).length
       const readingTime = Math.ceil(numberOfWords / wordsPerMinute)
       return {
-        ...base,
+        ...data,
+        slug: `/${data.slug}`,
+        slugAsParams: data.slug.split("/").slice(1).join("/"),
         readingTime,
       }
     }),
@@ -47,9 +39,14 @@ const authors = defineCollection({
       avatar: s.string(),
       twitter: s.string(),
       body: s.mdx(),
-      metadata: s.metadata(),
+      slug: s.path(),
     })
-    .transform(computedFields),
+    .transform((data) => ({
+      ...data,
+      _id: data.slug,
+      slug: `/${data.slug}`,
+      slugAsParams: data.slug.split("/").slice(1).join("/"),
+    })),
 })
 
 const pages = defineCollection({
@@ -60,9 +57,13 @@ const pages = defineCollection({
       title: s.string(),
       description: s.string().optional(),
       body: s.mdx(),
-      metadata: s.metadata(),
+      slug: s.path(),
     })
-    .transform(computedFields),
+    .transform((data) => ({
+      ...data,
+      slug: `/${data.slug}`,
+      slugAsParams: data.slug.split("/").slice(1).join("/"),
+    })),
 })
 
 export default defineConfig({
